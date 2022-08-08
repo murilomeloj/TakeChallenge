@@ -16,12 +16,12 @@ app.get("/getReposInfo", async (req, res) => {
             });
         const filteredArray = data.filter(repo => repo.language === "C#").slice(0, selectedRepos); // Filter the 5 oldest c# language repos
 
-        const allRepoData = {
+        const allRepoData = { //Create a structured object to send to external applications
             avatarUrl: filteredArray[0].owner.avatar_url,
             repoArr: []
         };
 
-        filteredArray.forEach(repo => { //Create a structured object to send to external applications
+        filteredArray.forEach(repo => {
             allRepoData.repoArr.push({
                 repoFullName: repo.full_name,
                 repoDesc: repo.description,
