@@ -2,7 +2,7 @@ const api = require("./api")
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
-//const arrDir = ["SharpSpin", "async-samples", "blip-client-testing-csharp", "telegram.bot"];
+const selectedRepos = 5;
 
 app.listen(port, () => {
     console.log("Server is running");
@@ -14,22 +14,19 @@ app.get("/getReposInfo", async (req, res) => {
             .catch((err) => {
                 throw err
             });
-        const filteredArray = data.filter(repo => {
-           return repo.language === "C#"
-        }).slice(0, 5); // Filter the 5 oldest c# language repos
-        console.log(filteredArray)
+        const filteredArray = data.filter(repo => repo.language === "C#").slice(0, selectedRepos); // Filter the 5 oldest c# language repos
+
         const allRepoData = {
             avatarUrl: filteredArray[0].owner.avatar_url,
             repoArr: []
         };
-        
-        filteredArray.forEach(repo => {
+
+        filteredArray.forEach(repo => { //Create a structured object to send to external applications
             allRepoData.repoArr.push({
                 repoFullName: repo.full_name,
                 repoDesc: repo.description,
             });
-        }) //Create a structured object to send to external applications
-        
+        })
         res.send(allRepoData)
     }
     catch (err) {
