@@ -38,7 +38,7 @@ app.get("/getReposInfo", async (req, res) => {
         };
 
         oldestRepos.forEach(repo => {
-            allRepoData.repoArr.push({
+            allRepoData.repositories.push({
                 repoFullName: repo.full_name,
                 repoDesc: repo.description,
             });
