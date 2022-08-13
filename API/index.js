@@ -1,4 +1,4 @@
-const api = require("./api")
+const api = require("./gitApi")
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,22 +14,55 @@ app.get("/getReposInfo", async (req, res) => {
             .catch((err) => {
                 throw err
             });
-        const filteredArray = data.filter(repo => repo.language === "C#").slice(0, selectedRepos); // Filter the 5 oldest c# language repos
+
+        let filteredArray = data.filter(repo => repo.language === "C#")
+
+        while (filteredArray.length < selectedRepos) {  //performs paging as long as the filtered repositories array size is smaller than the specified amount of repositories
+            let page = 2;
+            const { data } = await api.get(`orgs/takenet/repos?sort=created&direction=asc&page=${page}`)
+                .catch((err) => {
+                    throw err
+                });
+            page++;
+            data.forEach(item => {
+                if (item.language === "C#")
+                    filteredArray.push(item)
+            });
+        }
+
+        const oldestRepos = filteredArray.slice(0, selectedRepos); // Select the N oldest C# language repos
 
         const allRepoData = { //Create a structured object to send to external applications
-            avatarUrl: filteredArray[0].owner.avatar_url,
-            repoArr: []
+            avatarUrl: oldestRepos[0].owner.avatar_url,
+            repositories: []
         };
 
-        filteredArray.forEach(repo => {
+        oldestRepos.forEach(repo => {
             allRepoData.repoArr.push({
                 repoFullName: repo.full_name,
                 repoDesc: repo.description,
             });
         })
-        res.send(allRepoData)
+        const objSuccess = {
+            "result": allRepoData
+        }
+        res.send(objSuccess)
     }
     catch (err) {
-        res.send(err.response.data)
+        const objError = {
+            "title": err.response.statusText,
+            "detail": err.response.data.message,
+            "status": err.response.status
+        }
+        res.status(err.response.status).send(objError)
     }
 });
+
+app.use((req, res, next)=>{
+    const objError = {
+        "title": "Not found",
+        "detail": "Resource not found in API",
+        "status": 404
+    }
+    res.status(404).send(objError)
+})
