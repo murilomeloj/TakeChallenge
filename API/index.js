@@ -11,32 +11,21 @@ app.listen(port, () => {
 app.get("/getReposInfo", async (req, res) => {
     try {
         let { data } = await api.get("orgs/takenet/repos?sort=created&direction=asc") //Get all repos sorted by 'create date'
-            .catch((err) => {
-                throw err
-            });
-
-        let filteredArray = data.filter(repo => repo.language === "C#")
-
+        const filteredArray = data.filter(repo => repo.language === "C#")
         while (filteredArray.length < selectedRepos) {  //performs paging as long as the filtered repositories array size is smaller than the specified amount of repositories
             let page = 2;
             const { data } = await api.get(`orgs/takenet/repos?sort=created&direction=asc&page=${page}`)
-                .catch((err) => {
-                    throw err
-                });
             page++;
             data.forEach(item => {
                 if (item.language === "C#")
                     filteredArray.push(item)
             });
         }
-
         const oldestRepos = filteredArray.slice(0, selectedRepos); // Select the N oldest C# language repos
-
         const allRepoData = { //Create a structured object to send to external applications
             avatarUrl: oldestRepos[0].owner.avatar_url,
             repositories: []
         };
-
         oldestRepos.forEach(repo => {
             allRepoData.repositories.push({
                 repoFullName: repo.full_name,
@@ -46,7 +35,7 @@ app.get("/getReposInfo", async (req, res) => {
         const objSuccess = {
             "result": allRepoData
         }
-        res.send(objSuccess)
+        res.status(200).send(objSuccess)
     }
     catch (err) {
         const objError = {
@@ -58,7 +47,7 @@ app.get("/getReposInfo", async (req, res) => {
     }
 });
 
-app.use((req, res, next)=>{
+app.use((req, res, next) => {
     const objError = {
         "title": "Not found",
         "detail": "Resource not found in API",
