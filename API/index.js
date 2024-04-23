@@ -9,7 +9,7 @@ app.listen(port, () => {
 
 app.get("/getReposInfo", async (req, res) => {
     try {
-        const selectedRepos = req.query.name || 5;
+        const selectedRepos = req.query.repos || 5;
         const { data } = await api.get("orgs/takenet/repos?sort=created&direction=asc") //Get all repos sorted by 'create date'
         const filteredArray = data.filter(repo => repo.language === "C#")
         while (filteredArray.length < selectedRepos) {  //performs paging as long as the filtered repositories array size is smaller than the specified amount of repositories
