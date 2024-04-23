@@ -2,7 +2,6 @@ const api = require("./gitApi")
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
-const selectedRepos = 5;
 
 app.listen(port, () => {
     console.log("Server is running");
@@ -10,7 +9,8 @@ app.listen(port, () => {
 
 app.get("/getReposInfo", async (req, res) => {
     try {
-        let { data } = await api.get("orgs/takenet/repos?sort=created&direction=asc") //Get all repos sorted by 'create date'
+        const selectedRepos = req.query.name || 5;
+        const { data } = await api.get("orgs/takenet/repos?sort=created&direction=asc") //Get all repos sorted by 'create date'
         const filteredArray = data.filter(repo => repo.language === "C#")
         while (filteredArray.length < selectedRepos) {  //performs paging as long as the filtered repositories array size is smaller than the specified amount of repositories
             let page = 2;
